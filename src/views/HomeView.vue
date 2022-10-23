@@ -106,13 +106,15 @@
             <el-input style="width: 200px"
                       placeholder="请输入名称"
                       suffix-icon="el-icon-search"
+                      v-model="username"
             />
             <el-input style="width: 200px"
                       placeholder="请输入邮箱"
                       suffix-icon="el-icon-message"
                       class="ml-5"
+                      v-model="email"
             />
-            <el-button class ="ml-5" type="primary">搜索</el-button>
+            <el-button class ="ml-5" type="primary" @click="search">搜索</el-button>
           </div>
 
           <div style="margin: 10px 0">
@@ -124,12 +126,20 @@
 
 
           <el-table :data="tableData" border stripe :header-cell-class-name="headerBg">
-            <el-table-column prop="date" label="日期" width="140">
+
+            <el-table-column prop="id" label="id" width="40">
             </el-table-column>
-            <el-table-column prop="name" label="姓名" width="120">
+            <el-table-column prop="username" label="用户名称" width="100">
+            </el-table-column>
+            <el-table-column prop="nickname" label="用户昵称" width="100">
+            </el-table-column>
+            <el-table-column prop="email" label="用户邮箱">
+            </el-table-column>
+            <el-table-column prop="phone" label="手机号">
             </el-table-column>
             <el-table-column prop="address" label="地址">
             </el-table-column>
+
             <el-table-column prop="option" label="操作">
               <template>
                 <el-button type="success">编辑<i class="el-icon-edit"/></el-button>
@@ -138,11 +148,15 @@
             </el-table-column>
           </el-table>
           <div style="padding: 10px 0">
+<!--            size-change 和 current-change-->
             <el-pagination
-                :page-sizes="[5, 10,15, 20]"
-                :page-size="10"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="pageNum"
+                :page-sizes="[2, 5,10, 20]"
+                :page-size="pageSize"
                 layout="total, sizes, prev, pager, next, jumper"
-                :total="400">
+                :total="total">
             </el-pagination>
           </div>
         </el-main>
@@ -155,21 +169,24 @@
 export default {
   name: 'Home',
   data(){
-    const item = {
-      date: '2016-05-02',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1518 弄'
-    };
     return {
-      tableData: Array(10).fill(item),
+      tableData: [],
+      total:0,
       msg: "Hello deng",
+      pageNum:1,
+      pageSize:2,
       isCollapsed:false,
       collapseBtnClass:'el-icon-s-fold',
       isCollapse:false,
       sideWidth:200,
       logoTextShow:true,
-      headerBg:'headerBg'
+      headerBg:'headerBg',
+      username: "",
+      email:""
     }
+  },
+  created() {
+    this.loadDataFunction();
   },
   methods:{
     collapse(){
@@ -184,7 +201,74 @@ export default {
         this.collapseBtnClass = 'el-icon-s-fold';
         this.logoTextShow = !this.logoTextShow;
       }
-
+    },
+    handleCurrentChange(pageNum){
+      this.pageNum = pageNum
+      this.selectPage()
+    },
+    handleSizeChange(pageSize){
+      this.pageSize = pageSize
+      this.selectPage();
+    },
+    selectPage(){
+      if (this.username === "" && this.email === ""){
+        this.loadDataFunction()
+      }else if(this.username === "" && this.email !== ""){
+        this.selectByEmail()
+      }else if(this.username !== "" && this.email === ""){
+        this.searchByName()
+      }else{
+        this.searchByUsernameAndEmail()
+      }
+    },
+    search(){
+      if (this.username === "" && this.email === ""){
+        this.loadDataFunction()
+      }else if(this.username === "" && this.email !== ""){
+        this.selectByEmail()
+      }else if(this.username !== "" && this.email === ""){
+        this.searchByName()
+      }else{
+        this.searchByUsernameAndEmail()
+      }
+    },
+    searchByName(){
+      fetch("http://localhost:8081/user/pageByUsername?pageNum="+this.pageNum+"&pageSize="+this.pageSize+"&username="+this.username)
+          .then(
+              res=>res.json() //将字符串转换为json
+          ).then(res => {
+        this.tableData = res.data;
+        this.total = res.total;
+      })
+    },
+    searchByUsernameAndEmail(){
+      fetch("http://localhost:8081/user/searchByUsernameAndEmail?pageNum="+this.pageNum+"&pageSize="+this.pageSize+"&username="+this.username+"&email="+this.email)
+          .then(
+              res=>res.json() //将字符串转换为json
+          ).then(res => {
+        this.tableData = res.data;
+        this.total = res.total;
+      })
+    },
+    loadDataFunction(){
+      //请求分页查询数据
+      fetch("http://localhost:8081/user/page?pageNum="+this.pageNum+"&pageSize="+this.pageSize)
+          .then(
+              res=>res.json() //将字符串转换为json
+          ).then(res => {
+        this.tableData = res.data;
+        this.total = res.total;
+      })
+    },
+    selectByEmail() {
+      //请求分页查询数据
+      fetch("http://localhost:8081/user/pageByEmail?pageNum="+this.pageNum+"&pageSize="+this.pageSize+"&email="+this.email)
+          .then(
+              res=>res.json() //将字符串转换为json
+          ).then(res => {
+        this.tableData = res.data;
+        this.total = res.total;
+      })
     }
   }
 
