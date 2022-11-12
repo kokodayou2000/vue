@@ -16,6 +16,8 @@ const routes = [
         { path: "user",name:"用户管理" , component:() => import('../views/User')},
         { path: "UserDetail",name:"用户信息设置",component:()=>import('../views/UserDetail')},
         { path: "File",name:"文件管理",component:()=>import('../views/File')},
+        { path: "Menu",name:"菜单管理",component:()=>import('../views/Menu')},
+        { path: "Role",name:"角色管理",component:()=>import('../views/Role')},
     ]
   },
   {

@@ -13,28 +13,27 @@
 
 
     <el-form-item label="用户名">
-      <el-input v-model="form.username" autocomplete="off"></el-input>
+      <el-input v-model="form.username" :disabled="true" autocomplete="off"></el-input>
     </el-form-item>
     <el-form-item label="用户昵称">
       <el-input v-model="form.nickname" autocomplete="off"></el-input>
     </el-form-item>
     <el-form-item label="邮箱">
-      <el-input v-model="form.email" autocomplete="off"></el-input>
+      <el-input v-model="form.email" :disabled="true" autocomplete="off"></el-input>
     </el-form-item>
     <el-form-item label="电话">
-      <el-input v-model="form.phone" autocomplete="off"></el-input>
+      <el-input v-model="form.phone" :disabled="true" autocomplete="off"></el-input>
     </el-form-item>
     <el-form-item label="地址">
-      <el-input v-model="form.address" autocomplete="off"></el-input>
+      <el-input type="textarea" v-model="form.address" autocomplete="off"></el-input>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="save">确定</el-button>
     </el-form-item>
 
   </el-form>
-
-
 </el-card>
+
 </template>
 
 <script>
@@ -44,6 +43,7 @@ export default {
     return {
       form:{},
       user:localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null,
+
     }
   },
   created() {
@@ -72,8 +72,13 @@ export default {
 
               //更新浏览器缓存
               this.getUser();
+              this.user.token = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).token : null;
+              console.log(this.user.token);
+              this.user.nickname = this.form.nickname;
 
-
+              this.user.password = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).password : null;
+              this.user.username = this.form.username;
+              localStorage.setItem("user",JSON.stringify(this.user));
 
               /*
               //重新刷新页面的方法不是很好
@@ -92,8 +97,7 @@ export default {
     handleAvatarSuccess(res){
       console.log(res);
       this.form.avatarUrl = res;
-    },
-
+    }
   }
 }
 </script>

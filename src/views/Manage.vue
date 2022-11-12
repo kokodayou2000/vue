@@ -1,4 +1,5 @@
 <template>
+  <div>
     <el-container style="min-height: 100vh;">
 <!--      overflow:hidden 表示溢出的时候自动隐藏-->
       <el-aside :width="sideWidth+'px'"
@@ -20,6 +21,7 @@
         </el-main>
       </el-container>
     </el-container>
+  </div>
 </template>
 
 <script>

@@ -1,4 +1,6 @@
 <template>
+  <div>
+
   <div style="line-height: 60px;display: flex;" >
   <div style="flex:1;font-size:20px">
     <span :class="collapseBtnClass" style="cursor: pointer;font-size: 18px;" @click="collapse"></span>
@@ -35,6 +37,8 @@
     </el-dropdown-menu>
   </el-dropdown>
   </div>
+
+  </div>
 </template>
 
 <script>
@@ -54,7 +58,7 @@ export default {
     // '$route':function (){
     //   this.currentPathName = localStorage.getItem("currentPathName")
     // }
-    currentPathName(newVal,oldVal){
+    currentPathName(newVal){
       console.log(newVal)
     }
   },
