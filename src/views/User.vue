@@ -63,12 +63,15 @@
     </el-table-column>
     <el-table-column prop="nickname" label="用户昵称" width="100">
     </el-table-column>
+    <el-table-column prop="role" label="角色">
+    </el-table-column>
     <el-table-column prop="email" label="用户邮箱">
     </el-table-column>
     <el-table-column prop="phone" label="手机号">
     </el-table-column>
     <el-table-column prop="address" label="地址">
     </el-table-column>
+
 
     <el-table-column prop="option" label="操作">
       <template v-slot="scope">
@@ -120,6 +123,15 @@
       <el-form-item label="地址">
         <el-input v-model="form.address" autocomplete="off"></el-input>
       </el-form-item>
+      <el-form-item label="选择角色">
+        <el-select clearable v-model="form.role" placeholder="请选择" style="width: 80%">
+          <el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag">
+          </el-option>
+        </el-select>
+        <el-input v-model="form.address" autocomplete="off"></el-input>
+      </el-form-item>
+
+
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="cancel">取 消</el-button>
@@ -150,6 +162,7 @@ export default {
       //全局变量记录要删除的集合
       multipleSelection:[],
       headerBg:'headerBg',
+      roles:[]
     }
   },
   created() {
@@ -179,6 +192,10 @@ export default {
             this.tableData = res.records
             this.total = res.total
           })
+
+      this.request.get("/role").then(res => {
+        this.roles = res
+      })
     },
     reset(){
       this.username=""

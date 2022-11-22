@@ -25,7 +25,7 @@
 
     <el-submenu index="2">
       <template slot="title">
-        <i class="el-icon-message"></i>
+        <i class="el-icon-s-tools"></i>
         <span slot="title" >系统管理</span>
       </template>
 
@@ -38,7 +38,7 @@
 
       <el-menu-item index="/role">
         <template slot="title">
-          <i class="el-icon-attract"></i>
+          <i class="el-icon-user"></i>
           <span slot="title" >角色管理</span>
         </template>
       </el-menu-item>

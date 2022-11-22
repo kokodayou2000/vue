@@ -44,10 +44,12 @@
     </el-table-column>
     <el-table-column prop="description" label="角色信息" width="100">
     </el-table-column>
-
+    <el-table-column prop="flag" label="唯一标识" width="100">
+    </el-table-column>
 
     <el-table-column prop="option" label="操作">
       <template v-slot="scope">
+        <el-button type="info" slot="reference" @click="handleAddMenu(scope.row.id)">分配菜单<i class="el-icon-menu"/></el-button>
         <el-button type="success" @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"/></el-button>
         <el-popconfirm
             class="ml-5"
@@ -79,10 +81,36 @@
   </div>
 
 
+  <el-dialog title="菜单分配" :visible.sync="menuDialogVisible" width="30%">
+    <!--expanded 默认展开  checked 选中-->
+    <el-tree
+        :data="menuData"
+        show-checkbox
+        @check-change="handleCheckChange"
+        node-key="id"
+        ref="tree"
+        :props="defaultProps"
+        :default-expanded-keys="expands"
+        :default-checked-keys="checks"
+    >
+      <span class="custom-tree-node" slot-scope="{node,data}">
+        <span><i :class="data.icon"/>  {{data.name}}</span>
+      </span>
+    </el-tree>
+
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="cancel">取 消</el-button>
+      <el-button type="primary" @click="saveRoleMenu" >确 定</el-button>
+    </div>
+  </el-dialog>
+
   <el-dialog title="角色信息" :visible.sync="dialogFormVisible" width="30%">
     <el-form label-width="70px">
       <el-form-item label="用户名">
         <el-input v-model="form.name" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="唯一标识">
+        <el-input v-model="form.flag" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="角色描述">
         <el-input v-model="form.description" autocomplete="off"></el-input>
@@ -112,10 +140,20 @@ export default {
       description:"",
       dialogTableVisible:false,
       dialogFormVisible:false,
+      menuDialogVisible: false,
+      menuForm: {},
       form:{},
+      expands:[],
+      checks:[],
       //全局变量记录要删除的集合
       multipleSelection:[],
       headerBg:'headerBg',
+      menuData: [],
+      defaultProps: {
+        children: 'children',
+        label: 'name'
+      },
+      roleId:0,
     }
   },
   created() {
@@ -123,6 +161,26 @@ export default {
     this.loadPage()
   },
   methods:{
+    saveRoleMenu(){
+
+      this.request.post("/roleMenu/"+this.roleId,this.$refs.tree.getCheckedKeys()).then(
+          (res)=>{
+            if (res.code === '200'){
+              this.menuDialogVisible = false
+              this.$message.success("修改成功")
+            }else{
+              this.$message.error("修改失败")
+            }
+          }
+      )
+
+
+    },
+    handleCheckChange(data, checked, indeterminate) {
+    },
+    handleEditMenu(){
+      this.dialogFormVisible = true
+    },
     handleCurrentChange(pageNum){
       this.pageNum = pageNum
       this.loadPage()
@@ -154,7 +212,26 @@ export default {
       this.dialogFormVisible=true
       this.form={}
     },
+    handleAddMenu(roleId){
+      this.menuDialogVisible=true
+
+      this.roleId = roleId
+      this.request.get("/menu/findAll")
+          .then(res => {
+            this.menuData = res.data
+            //id的数组
+            this.expands = this.menuData.map(v => v.id)
+          })
+
+      //将checks赋值
+      this.request.get("/roleMenu/getIds/"+roleId)
+          .then(res => {
+            this.checks = res.data
+          })
+
+    },
     save(){
+
       this.request.post("/role",this.form).then( res=>{
         if (res){
           this.$message.success("保存成功")
@@ -166,8 +243,9 @@ export default {
       })
     },
     cancel(){
+
+      this.menuDialogVisible = false
       this.loadPage()
-      this.dialogFormVisible = false
     },
     handleEdit(row){
       this.form = row

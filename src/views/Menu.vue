@@ -30,23 +30,26 @@
 
   <el-table :data="tableData" border stripe
             :header-cell-class-name="headerBg"
-            @selection-change="handleSelectionChange">
+            row-key="id"
+            default-expand-all
+            @selection-change="handleSelectionChange"
+  >
     <!--多选框，为了批量删除-->
-    <el-table-column
-        type="selection"
-        width="55">
+    <el-table-column type="selection" width="55"></el-table-column>
+    <el-table-column prop="id" label="id" width="80"></el-table-column>
+    <el-table-column prop="name" label="名称" ></el-table-column>
+    <el-table-column prop="path" label="路径" ></el-table-column>
+    <el-table-column prop="icon" label="图标" >
+      <template slot-scope="scope">
+        <i :class="scope.row.icon" style="font-size: 25px"/>
+      </template>
     </el-table-column>
-
-    <el-table-column prop="id" label="id" width="40"></el-table-column>
-    <el-table-column prop="name" label="名称" width="100"></el-table-column>
-    <el-table-column prop="path" label="路径" width="100"></el-table-column>
-    <el-table-column prop="icon" label="图标" width="100"></el-table-column>
-    <el-table-column prop="description" label="描述" width="100"></el-table-column>
-
-
-    <el-table-column prop="option" label="操作">
-      <template v-slot="scope">
+    <el-table-column prop="description" label="描述" ></el-table-column>
+    <el-table-column prop="option" label="操作" width="280">
+      <template slot-scope="scope">
+        <el-button type="info" @click="addChildrenMenu(scope.row.id)">新增子菜单<i class="el-icon-plus"/></el-button>
         <el-button type="success" @click="handleEdit(scope.row)">编辑<i class="el-icon-edit"/></el-button>
+
         <el-popconfirm
             class="ml-5"
             confirm-button-text='确定'
@@ -63,18 +66,7 @@
   </el-table>
 
 
-  <div style="padding: 10px 0">
-    <!--            size-change 和 current-change-->
-    <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pageNum"
-        :page-sizes="[2, 5,10, 20]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total">
-    </el-pagination>
-  </div>
+
 
 
   <el-dialog title="角色信息" :visible.sync="dialogFormVisible" width="30%">
@@ -86,12 +78,18 @@
         <el-input v-model="form.path" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="图标">
-        <el-input v-model="form.icon" autocomplete="off"></el-input>
+          <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 80%">
+            <el-option v-for="item in options" :key="item.name" :label="item.name" :value="item.value">
+              <i :class="item.value" /> {{item.name}}
+            </el-option>
+          </el-select>
       </el-form-item>
       <el-form-item label="描述">
         <el-input v-model="form.description" autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
+
+
     <div slot="footer" class="dialog-footer">
       <el-button @click="cancel">取 消</el-button>
       <el-button type="primary" @click="save" >确 定</el-button>
@@ -105,37 +103,36 @@
 <script>
 export default {
   name: "Menu",
-  data(){
-    return{
+  data() {
+    return {
       tableData: [],
-      total:0,
-      pageNum:1,
-      pageSize:10,
-      records:[],
+      total: 0,
+      pageNum: 1,
+      pageSize: 10,
+      records: [],
       name: "",
-      path:"",
-      icon:"",
-      description:"",
-      dialogTableVisible:false,
-      dialogFormVisible:false,
-      form:{},
+      path: "",
+      icon: "",
+      description: "",
+      dialogTableVisible: false,
+      dialogFormVisible: false,
+      menuDialogVisible: false,
+      form: {},
+      menuForm: {},
       //全局变量记录要删除的集合
-      multipleSelection:[],
-      headerBg:'headerBg',
-    }
+      multipleSelection: [],
+      headerBg: 'headerBg',
+      options:[],
+      }
   },
   created() {
     // this.loadDataFunction();
-    this.loadPage()
+    //this.loadPage()
+    this.loadAll()
   },
   methods:{
-    handleCurrentChange(pageNum){
-      this.pageNum = pageNum
-      this.loadPage()
-    },
-    handleSizeChange(pageSize){
-      this.pageSize = pageSize
-      this.loadPage()
+    handleCheckChange(data, checked, indeterminate) {
+      console.log(data, checked, indeterminate);
     },
     //使用axios的优势的能在request里面设置一些通用数据，可以更好的设置参数
     loadPage(){
@@ -151,9 +148,27 @@ export default {
             this.total = res.total
           })
     },
+    addChildrenMenu(pid){
+      this.dialogFormVisible = true;
+      this.form={};
+      if (pid){
+        this.form.pid = pid;
+      }
+    },
+    loadAll(){
+      this.request.get("/menu/findAll", {
+        params:{
+          name:this.name
+        }
+      })
+          .then(res => {
+            this.tableData = res.data
+            console.log(res)
+          })
+    },
     reset(){
       this.name=""
-      this.loadPage()
+      this.loadAll()
     },
     handleAdd(){
       //显示新增页
@@ -165,26 +180,47 @@ export default {
         if (res){
           this.$message.success("保存成功")
           this.dialogFormVisible = false
-          this.loadPage()
+          this.loadAll()
+        }else{
+          this.$message.error("保存失败")
+        }
+      })
+    },
+    saveMenu(){
+      this.request.post("/menu",this.menuForm).then( res=>{
+        if (res){
+          this.$message.success("保存成功")
+          this.menuDialogVisible = false
+          this.loadAll()
         }else{
           this.$message.error("保存失败")
         }
       })
     },
     cancel(){
-      this.loadPage()
+      this.loadAll()
       this.dialogFormVisible = false
     },
     handleEdit(row){
       this.form = row
       this.dialogFormVisible = true
+      //请求图标的数据
+      this.request.get("/dict/getIcons")
+          .then( res =>{
+          this.options = res.data
+        }
+      )
+    },
+    handleEditMenu(id){
+      let userId = id
+      this.menuDialogVisible = true
     },
     handleDelete(id){
       this.request.delete("/menu/"+id)
           .then(res =>{
             if(res){
               this.$message.success("删除成功")
-              this.loadPage()
+              this.loadAll()
             }else{
               this.$message.error("删除失败")
             }}
@@ -203,7 +239,7 @@ export default {
           .then(res =>{
             if(res){
               this.$message.success("批量删除成功")
-              this.loadPage()
+              this.loadAll()
             }else{
               this.$message.error("批量删除失败")
             }}
