@@ -29,6 +29,15 @@
         <span slot="title" >系统管理</span>
       </template>
 
+      <template v-for="item in calList()" >
+        <el-menu-item :index= "item.path" >
+          <template slot="title">
+            <i :class="item.icon"></i>
+            <span slot="title" >{{item.description}}</span>
+          </template>
+        </el-menu-item>
+      </template>
+<!--
       <el-menu-item index="/user">
         <template slot="title">
           <i class="el-icon-s-custom"></i>
@@ -57,6 +66,8 @@
         </template>
       </el-menu-item>
 
+
+-->
     </el-submenu>
   </el-menu>
 </template>
@@ -64,17 +75,33 @@
 <script>
 export default {
   name: "Aside",
+  data(){
+    return {
+      menus:null,
+      menu_List:{},
+    }
+  },
   props: {
     isCollapsed: Boolean,
     logoTextShow: Boolean
+  },
+  created() {
+
+    this.menus = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null
+    this.menu_List = this.menus.menuList;
+
+    console.log(this.menu_List)
   },
   methods:{
     // handlerSelect(index){
     //   console.log(index)
     //   console.log(this.$router.options.routes)
     // }
+    calList(){
+      return this.menu_List.filter(l => l.pid !==0)
+    }
 
-  }
+  },
 
 }
 </script>
