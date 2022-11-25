@@ -92,7 +92,10 @@
         :props="defaultProps"
         :default-expanded-keys="expands"
         :default-checked-keys="checks"
+        :check-strictly="true"
     >
+<!--      check-strictly 允许勾选父菜单  -->
+
       <span class="custom-tree-node" slot-scope="{node,data}">
         <span><i :class="data.icon"/>  {{data.name}}</span>
       </span>
@@ -167,6 +170,7 @@ export default {
           (res)=>{
             if (res.code === '200'){
               this.menuDialogVisible = false
+              this.$store.commit("logout")
               this.$message.success("修改成功")
             }else{
               this.$message.error("修改失败")

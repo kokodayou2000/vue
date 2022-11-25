@@ -12,7 +12,7 @@
 
       <el-container>
         <el-header style="border-bottom: 1px solid #ccc;">
-          <Header :collapseBtnClass="collapseBtnClass" :collapse="collapse" :user="user"/>
+          <Header :collapseBtnClass="collapseBtnClass" :collapse="collapse" :user="user" :menu="user.menu_List"/>
         </el-header>
 
         <el-main>

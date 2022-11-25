@@ -16,59 +16,54 @@
       <b style="color: white" v-show="logoTextShow">后台管理系统</b>
     </div>
 
-    <el-menu-item index="/home">
-      <template slot="title" @click="">
-        <i class="el-icon-house"></i>
-        <span slot="title" >主页</span>
-      </template>
-    </el-menu-item>
 
-    <el-submenu index="2">
-      <template slot="title">
-        <i class="el-icon-s-tools"></i>
-        <span slot="title" >系统管理</span>
-      </template>
+<!--    <template v-for="item in menu_List" >-->
+<!--      <el-submenu :index= "item.path" >-->
+<!--        <template slot="title">-->
+<!--          <i :class="item.icon"></i>-->
+<!--          <span slot="title" >{{item.description}}</span>-->
+<!--        </template>-->
 
-      <template v-for="item in calList()" >
-        <el-menu-item :index= "item.path" >
-          <template slot="title">
-            <i :class="item.icon"></i>
-            <span slot="title" >{{item.description}}</span>
-          </template>
+
+<!--      <template v-for="subItem in item.children" v-if="item.children !== null">-->
+<!--        <el-menu-item :index= "subItem.path" >-->
+<!--          <template slot="title">-->
+<!--            <i :class="subItem.icon"></i>-->
+<!--            <span slot="title" >{{subItem.description}}</span>-->
+<!--          </template>-->
+<!--        </el-menu-item>-->
+<!--      </template>-->
+
+<!--      </el-submenu>-->
+<!--    </template>-->
+
+    <div v-for="item in menu_List" :key="item.id">
+      <div v-if="item.path">
+        <el-menu-item :index="item.path">
+          <i :class="item.icon"></i>
+          <span slot="title">{{item.description}}</span>
         </el-menu-item>
-      </template>
-<!--
-      <el-menu-item index="/user">
-        <template slot="title">
-          <i class="el-icon-s-custom"></i>
-          <span slot="title" >用户管理</span>
-        </template>
-      </el-menu-item>
+      </div>
 
-      <el-menu-item index="/role">
-        <template slot="title">
-          <i class="el-icon-user"></i>
-          <span slot="title" >角色管理</span>
-        </template>
-      </el-menu-item>
+      <div v-else>
+        <el-submenu :index="item.id +''">
+          <template slot="title">
+            <i :class="item.icon"/>
+            <span slot="title">{{item.description}}</span>
+          </template>
+          <div v-for="subItem in item.children" :key="subItem.id">
+            <el-menu-item :index="subItem.path">
+              <i :class="subItem.icon"/>
+              <span slot="title">{{subItem.description}}</span>
+            </el-menu-item>
+          </div>
+        </el-submenu>
+      </div>
 
-      <el-menu-item index="/menu">
-        <template slot="title">
-          <i class="el-icon-menu"></i>
-          <span slot="title" >菜单管理</span>
-        </template>
-      </el-menu-item>
-
-      <el-menu-item index="/file">
-        <template slot="title">
-          <i class="el-icon-document"></i>
-          <span slot="title" >文件管理</span>
-        </template>
-      </el-menu-item>
+    </div>
 
 
--->
-    </el-submenu>
+
   </el-menu>
 </template>
 
@@ -77,7 +72,7 @@ export default {
   name: "Aside",
   data(){
     return {
-      menus:null,
+      menus:{},
       menu_List:{},
     }
   },
@@ -90,16 +85,17 @@ export default {
     this.menus = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null
     this.menu_List = this.menus.menuList;
 
-    console.log(this.menu_List)
+    console.log(this.menus)
   },
   methods:{
     // handlerSelect(index){
     //   console.log(index)
     //   console.log(this.$router.options.routes)
     // }
-    calList(){
-      return this.menu_List.filter(l => l.pid !==0)
-    }
+    //当时为了省力，过滤了一级菜单
+    // calList(){
+    //   return this.menu_List.filter(l => l.pid !==0)
+    // }
 
   },
 

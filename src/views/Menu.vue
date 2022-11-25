@@ -39,6 +39,7 @@
     <el-table-column prop="id" label="id" width="80"></el-table-column>
     <el-table-column prop="name" label="名称" ></el-table-column>
     <el-table-column prop="path" label="路径" ></el-table-column>
+    <el-table-column prop="component" label="组件路径" ></el-table-column>
     <el-table-column prop="icon" label="图标" >
       <template slot-scope="scope">
         <i :class="scope.row.icon" style="font-size: 25px"/>
@@ -84,9 +85,16 @@
             </el-option>
           </el-select>
       </el-form-item>
+
+      <el-form-item label="组件路径">
+        <el-input v-model="form.component" autocomplete="off"></el-input>
+      </el-form-item>
+
       <el-form-item label="描述">
         <el-input v-model="form.description" autocomplete="off"></el-input>
       </el-form-item>
+
+
     </el-form>
 
 
